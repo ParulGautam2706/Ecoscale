@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: greencloud
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-greencloud_dev}
+      POSTGRES_DB: greencloud
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greencloud"]
+      interval: 5s
+      retries: 10
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://greencloud:${POSTGRES_PASSWORD:-greencloud_dev}@db:5432/greencloud
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      CORS_ORIGINS: '["http://localhost:8080"]'
+      DATA_MODE: simulated
+    depends_on:
+      db: { condition: service_healthy }
+    volumes: [artifacts:/app/artifacts]
+    ports: ["8000:8000"]
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["8080:80"]
+volumes:
+  pgdata:
+  artifacts:

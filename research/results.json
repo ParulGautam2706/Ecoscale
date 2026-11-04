@@ -1,0 +1,607 @@
+{
+  "config": {
+    "days": 7,
+    "interval": 600,
+    "seed": 42,
+    "fast": false
+  },
+  "data_origin": "simulated (synthetic profiles; illustrative carbon intensity)",
+  "seed": {
+    "resources": 13,
+    "samples": 13104,
+    "days": 7,
+    "interval_s": 600,
+    "origin": "simulated",
+    "carbon_intensity_source": "illustrative_synthetic"
+  },
+  "estimation_comparison": {
+    "note": "No metered ground truth exists, so neither is 'correct'; this shows how much the richer model changes the estimate.",
+    "total_paper_baseline_kwh": 352.99,
+    "total_improved_kwh": 444.12,
+    "difference_pct": 25.82,
+    "per_resource": [
+      {
+        "resource": "api-service",
+        "paper_baseline_kwh": 37.419,
+        "improved_kwh": 66.412,
+        "paper_baseline_co2e_kg": 10.937,
+        "improved_co2e_kg": 19.394
+      },
+      {
+        "resource": "cache-1",
+        "paper_baseline_kwh": 21.563,
+        "improved_kwh": 16.783,
+        "paper_baseline_co2e_kg": 5.193,
+        "improved_co2e_kg": 4.038
+      },
+      {
+        "resource": "cache-2",
+        "paper_baseline_kwh": 21.577,
+        "improved_kwh": 16.79,
+        "paper_baseline_co2e_kg": 5.196,
+        "improved_co2e_kg": 4.04
+      },
+      {
+        "resource": "dev-sandbox-1",
+        "paper_baseline_kwh": 18.271,
+        "improved_kwh": 17.508,
+        "paper_baseline_co2e_kg": 12.42,
+        "improved_co2e_kg": 11.901
+      },
+      {
+        "resource": "dev-sandbox-2",
+        "paper_baseline_kwh": 18.282,
+        "improved_kwh": 15.012,
+        "paper_baseline_co2e_kg": 4.391,
+        "improved_co2e_kg": 3.606
+      },
+      {
+        "resource": "legacy-reporting",
+        "paper_baseline_kwh": 24.603,
+        "improved_kwh": 47.32,
+        "paper_baseline_co2e_kg": 9.349,
+        "improved_co2e_kg": 17.978
+      },
+      {
+        "resource": "metrics-collector",
+        "paper_baseline_kwh": 33.892,
+        "improved_kwh": 13.463,
+        "paper_baseline_co2e_kg": 1.357,
+        "improved_co2e_kg": 0.539
+      },
+      {
+        "resource": "ml-training",
+        "paper_baseline_kwh": 30.74,
+        "improved_kwh": 60.787,
+        "paper_baseline_co2e_kg": 11.802,
+        "improved_co2e_kg": 23.421
+      },
+      {
+        "resource": "nightly-etl",
+        "paper_baseline_kwh": 27.377,
+        "improved_kwh": 51.931,
+        "paper_baseline_co2e_kg": 10.309,
+        "improved_co2e_kg": 19.571
+      },
+      {
+        "resource": "report-batch",
+        "paper_baseline_kwh": 25.378,
+        "improved_kwh": 34.333,
+        "paper_baseline_co2e_kg": 17.11,
+        "improved_co2e_kg": 23.188
+      },
+      {
+        "resource": "staging-db",
+        "paper_baseline_kwh": 22.613,
+        "improved_kwh": 25.818,
+        "paper_baseline_co2e_kg": 6.568,
+        "improved_co2e_kg": 7.494
+      },
+      {
+        "resource": "web-frontend-1",
+        "paper_baseline_kwh": 35.892,
+        "improved_kwh": 39.217,
+        "paper_baseline_co2e_kg": 13.709,
+        "improved_co2e_kg": 14.962
+      },
+      {
+        "resource": "web-frontend-2",
+        "paper_baseline_kwh": 35.386,
+        "improved_kwh": 38.748,
+        "paper_baseline_co2e_kg": 13.516,
+        "improved_co2e_kg": 14.782
+      }
+    ]
+  },
+  "ml": {
+    "cpu_forecast": {
+      "best_model": "hist_gradient_boosting",
+      "train_rows": 8710,
+      "test_rows": 2210,
+      "split_ts": "2026-10-28 17:30:00",
+      "baselines": {
+        "persistence": {
+          "mae": 0.05253393664731894,
+          "rmse": 0.15193385673389953,
+          "r2": 0.3517273490256928
+        },
+        "seasonal_naive": {
+          "mae": 0.017162129538066916,
+          "rmse": 0.039018751804056645,
+          "r2": 0.9572441720881123
+        }
+      },
+      "models": [
+        {
+          "model": "linear_regression",
+          "mae": 0.05574157158111177,
+          "rmse": 0.11980383437001631,
+          "r2": 0.5969211491110745,
+          "cv_rmse_mean": 0.12864587115276901,
+          "cv_rmse_std": 0.020499193367918923,
+          "train_seconds": 0.009,
+          "predict_ms_per_1000": 0.357,
+          "model_size_kb": 1.8,
+          "rss_delta_mb": 0.0
+        },
+        {
+          "model": "random_forest",
+          "mae": 0.013957931272416664,
+          "rmse": 0.030597702837342446,
+          "r2": 0.9737078427755321,
+          "cv_rmse_mean": 0.044839307530123086,
+          "cv_rmse_std": 0.014502702470086417,
+          "train_seconds": 0.578,
+          "predict_ms_per_1000": 16.351,
+          "model_size_kb": 2793.0,
+          "rss_delta_mb": -0.2
+        },
+        {
+          "model": "gradient_boosting",
+          "mae": 0.027979485488985704,
+          "rmse": 0.05842353305639553,
+          "r2": 0.9041429170158282,
+          "cv_rmse_mean": 0.06086219644021785,
+          "cv_rmse_std": 0.014110506005529364,
+          "train_seconds": 6.667,
+          "predict_ms_per_1000": 2.734,
+          "model_size_kb": 280.9,
+          "rss_delta_mb": 0.3
+        },
+        {
+          "model": "hist_gradient_boosting",
+          "mae": 0.014468235713943334,
+          "rmse": 0.03035547618831324,
+          "r2": 0.9741224786341657,
+          "cv_rmse_mean": 0.037275403695737515,
+          "cv_rmse_std": 0.006628864109422129,
+          "train_seconds": 0.655,
+          "predict_ms_per_1000": 4.356,
+          "model_size_kb": 732.8,
+          "rss_delta_mb": 0.1
+        },
+        {
+          "model": "xgboost",
+          "mae": 0.015883160970972924,
+          "rmse": 0.032874374405261364,
+          "r2": 0.9696496593642202,
+          "cv_rmse_mean": 0.04155702552483375,
+          "cv_rmse_std": 0.007109422707000028,
+          "train_seconds": 0.276,
+          "predict_ms_per_1000": 1.359,
+          "model_size_kb": 506.4,
+          "rss_delta_mb": 1.7
+        },
+        {
+          "model": "lightgbm",
+          "mae": 0.014616571335203866,
+          "rmse": 0.031027412753653897,
+          "r2": 0.9729641703160472,
+          "cv_rmse_mean": 0.03972617974102542,
+          "cv_rmse_std": 0.008367356853864586,
+          "train_seconds": 0.299,
+          "predict_ms_per_1000": 3.346,
+          "model_size_kb": 588.3,
+          "rss_delta_mb": 0.2
+        }
+      ],
+      "proxy_label_note": null,
+      "rmse_improvement_vs_persistence_pct": -80.02,
+      "rmse_improvement_vs_seasonal_naive_pct": -22.2
+    },
+    "energy_wh": {
+      "best_model": "xgboost",
+      "train_rows": 10465,
+      "test_rows": 2613,
+      "split_ts": "2026-10-28 14:20:00",
+      "baselines": {},
+      "models": [
+        {
+          "model": "linear_regression",
+          "mae": 1.5798574135905834,
+          "rmse": 2.428714037888799,
+          "r2": 0.9850119515950513,
+          "cv_rmse_mean": 41.233352059865155,
+          "cv_rmse_std": 54.84379070608461,
+          "train_seconds": 0.009,
+          "predict_ms_per_1000": 0.325,
+          "model_size_kb": 1.6,
+          "rss_delta_mb": 0.0
+        },
+        {
+          "model": "random_forest",
+          "mae": 0.02083569851333821,
+          "rmse": 0.06338455573618197,
+          "r2": 0.9999897915637193,
+          "cv_rmse_mean": 0.36795048404205,
+          "cv_rmse_std": 0.32822496508959476,
+          "train_seconds": 0.421,
+          "predict_ms_per_1000": 17.255,
+          "model_size_kb": 6662.3,
+          "rss_delta_mb": 13.5
+        },
+        {
+          "model": "gradient_boosting",
+          "mae": 0.11176729397005501,
+          "rmse": 0.18844384113352794,
+          "r2": 0.999909768907222,
+          "cv_rmse_mean": 0.3811775655914456,
+          "cv_rmse_std": 0.23551609282017402,
+          "train_seconds": 5.151,
+          "predict_ms_per_1000": 2.315,
+          "model_size_kb": 300.1,
+          "rss_delta_mb": 0.5
+        },
+        {
+          "model": "hist_gradient_boosting",
+          "mae": 0.0441460865536745,
+          "rmse": 0.11058155240912672,
+          "r2": 0.9999689288243574,
+          "cv_rmse_mean": 0.2634166798501425,
+          "cv_rmse_std": 0.17601549086375506,
+          "train_seconds": 0.386,
+          "predict_ms_per_1000": 2.267,
+          "model_size_kb": 360.5,
+          "rss_delta_mb": 1.1
+        },
+        {
+          "model": "xgboost",
+          "mae": 0.04530866627129879,
+          "rmse": 0.09873291045764003,
+          "r2": 0.99997523055933,
+          "cv_rmse_mean": 0.23053669530145263,
+          "cv_rmse_std": 0.14710832061679024,
+          "train_seconds": 0.241,
+          "predict_ms_per_1000": 1.543,
+          "model_size_kb": 478.6,
+          "rss_delta_mb": 0.0
+        },
+        {
+          "model": "lightgbm",
+          "mae": 0.03765151910128508,
+          "rmse": 0.09369004602959916,
+          "r2": 0.999977696181332,
+          "cv_rmse_mean": 0.325096904679146,
+          "cv_rmse_std": 0.2500817584914229,
+          "train_seconds": 0.328,
+          "predict_ms_per_1000": 2.197,
+          "model_size_kb": 573.6,
+          "rss_delta_mb": 0.0
+        }
+      ],
+      "proxy_label_note": "Energy labels come from the configured power model, NOT from metered hardware. The model is a fast proxy estimator of that model; metrics measure agreement with it, not real-world accuracy."
+    }
+  },
+  "recommendations": {
+    "created": 9,
+    "by_type": {
+      "consolidate": 1,
+      "region": 6,
+      "idle": 2
+    },
+    "totals": {
+      "co2e_kg_day": 11.899,
+      "cost_usd_day": 20.89,
+      "energy_kwh_day": 14.262
+    },
+    "status": "advisory only; no infrastructure was modified"
+  },
+  "recommendation_list": [
+    {
+      "resource": "dev-sandbox-1",
+      "type": "idle",
+      "risk": "medium",
+      "priority": "high",
+      "co2e_pct": 100.0,
+      "cost_pct": 100.0,
+      "co2e_kg_month": 51.003,
+      "cost_usd_month": 75.6,
+      "confidence": 0.67
+    },
+    {
+      "resource": "dev-sandbox-2",
+      "type": "idle",
+      "risk": "medium",
+      "priority": "low",
+      "co2e_pct": 100.0,
+      "cost_pct": 100.0,
+      "co2e_kg_month": 15.453,
+      "cost_usd_month": 75.6,
+      "confidence": 0.66
+    },
+    {
+      "resource": "cache-2",
+      "type": "consolidate",
+      "risk": "medium",
+      "priority": "medium",
+      "co2e_pct": 57.95,
+      "cost_pct": 75.0,
+      "co2e_kg_month": 20.028,
+      "cost_usd_month": 113.4,
+      "confidence": 0.7
+    },
+    {
+      "resource": "api-service",
+      "type": "region",
+      "risk": "low",
+      "priority": "high",
+      "co2e_pct": 86.84,
+      "cost_pct": 8.78,
+      "co2e_kg_month": 71.634,
+      "cost_usd_month": 27.8,
+      "confidence": 0.7
+    },
+    {
+      "resource": "legacy-reporting",
+      "type": "region",
+      "risk": "medium",
+      "priority": "high",
+      "co2e_pct": 95.32,
+      "cost_pct": 74.65,
+      "co2e_kg_month": 73.35,
+      "cost_usd_month": 215.0,
+      "confidence": 0.7
+    },
+    {
+      "resource": "staging-db",
+      "type": "region",
+      "risk": "medium",
+      "priority": "medium",
+      "co2e_pct": 93.09,
+      "cost_pct": 76.64,
+      "co2e_kg_month": 29.853,
+      "cost_usd_month": 121.4,
+      "confidence": 0.7
+    },
+    {
+      "resource": "nightly-etl",
+      "type": "region",
+      "risk": "high",
+      "priority": "low",
+      "co2e_pct": 90.92,
+      "cost_pct": -2.78,
+      "co2e_kg_month": 19.728,
+      "cost_usd_month": -1.0,
+      "confidence": 0.82
+    },
+    {
+      "resource": "report-batch",
+      "type": "region",
+      "risk": "high",
+      "priority": "low",
+      "co2e_pct": 95.67,
+      "cost_pct": -0.53,
+      "co2e_kg_month": 23.973,
+      "cost_usd_month": -0.1,
+      "confidence": 0.81
+    },
+    {
+      "resource": "ml-training",
+      "type": "region",
+      "risk": "medium",
+      "priority": "medium",
+      "co2e_pct": 91.6,
+      "cost_pct": -0.46,
+      "co2e_kg_month": 51.948,
+      "cost_usd_month": -1.0,
+      "confidence": 0.81
+    }
+  ],
+  "before_after": {
+    "empty": false,
+    "baseline_per_day": {
+      "energy_kwh_day": 50.664,
+      "co2e_kg_day": 17.58,
+      "cost_usd_day": 55.35
+    },
+    "after_per_day": {
+      "energy_kwh_day": 36.402,
+      "co2e_kg_day": 5.681,
+      "cost_usd_day": 34.46
+    },
+    "reduction_pct": {
+      "energy_kwh_day": 28.15,
+      "co2e_kg_day": 67.69,
+      "cost_usd_day": 37.74
+    },
+    "recommendations_counted": 9,
+    "note": "Estimated; assumes every non-rejected recommendation is applied. Not a measured outcome.",
+    "origin": "estimated"
+  },
+  "tradeoffs": [
+    {
+      "preset": "carbon_first",
+      "weights": {
+        "carbon": 0.7,
+        "cost": 0.15,
+        "latency": 0.1,
+        "sla": 0.05
+      },
+      "baseline": {
+        "energy_kwh_day": 50.663507207076854,
+        "co2e_kg_day": 17.57969978403734,
+        "cost_usd_day": 55.35000000000003,
+        "mean_latency_ms": 5.0,
+        "mean_sla_risk": 0.009087947564864907
+      },
+      "optimized": {
+        "energy_kwh_day": 39.057760596553756,
+        "co2e_kg_day": 1.5317192450146173,
+        "cost_usd_day": 38.20000000000001,
+        "mean_latency_ms": 97.0,
+        "mean_sla_risk": 0.3997723323681009
+      },
+      "delta_pct": {
+        "energy_kwh_day": -22.91,
+        "co2e_kg_day": -91.29,
+        "cost_usd_day": -30.98
+      },
+      "delta_abs": {
+        "mean_latency_ms": 92.0,
+        "mean_sla_risk": 0.3907
+      },
+      "changed_workloads": 12
+    },
+    {
+      "preset": "cost_first",
+      "weights": {
+        "carbon": 0.15,
+        "cost": 0.7,
+        "latency": 0.1,
+        "sla": 0.05
+      },
+      "baseline": {
+        "energy_kwh_day": 50.663507207076854,
+        "co2e_kg_day": 17.57969978403734,
+        "cost_usd_day": 55.35000000000003,
+        "mean_latency_ms": 5.0,
+        "mean_sla_risk": 0.009087947564864907
+      },
+      "optimized": {
+        "energy_kwh_day": 39.519813017549225,
+        "co2e_kg_day": 2.862518853792845,
+        "cost_usd_day": 38.253333333333345,
+        "mean_latency_ms": 69.0,
+        "mean_sla_risk": 0.22394859517139584
+      },
+      "delta_pct": {
+        "energy_kwh_day": -22.0,
+        "co2e_kg_day": -83.72,
+        "cost_usd_day": -30.89
+      },
+      "delta_abs": {
+        "mean_latency_ms": 64.0,
+        "mean_sla_risk": 0.2149
+      },
+      "changed_workloads": 12
+    },
+    {
+      "preset": "performance_first",
+      "weights": {
+        "carbon": 0.1,
+        "cost": 0.1,
+        "latency": 0.4,
+        "sla": 0.4
+      },
+      "baseline": {
+        "energy_kwh_day": 50.663507207076854,
+        "co2e_kg_day": 17.57969978403734,
+        "cost_usd_day": 55.35000000000003,
+        "mean_latency_ms": 5.0,
+        "mean_sla_risk": 0.009087947564864907
+      },
+      "optimized": {
+        "energy_kwh_day": 43.540419402803984,
+        "co2e_kg_day": 11.717233129466976,
+        "cost_usd_day": 41.73666666666667,
+        "mean_latency_ms": 10.0,
+        "mean_sla_risk": 0.010192520495427031
+      },
+      "delta_pct": {
+        "energy_kwh_day": -14.06,
+        "co2e_kg_day": -33.35,
+        "cost_usd_day": -24.6
+      },
+      "delta_abs": {
+        "mean_latency_ms": 5.0,
+        "mean_sla_risk": 0.0011
+      },
+      "changed_workloads": 10
+    },
+    {
+      "preset": "balanced",
+      "weights": {
+        "carbon": 0.25,
+        "cost": 0.25,
+        "latency": 0.25,
+        "sla": 0.25
+      },
+      "baseline": {
+        "energy_kwh_day": 50.663507207076854,
+        "co2e_kg_day": 17.57969978403734,
+        "cost_usd_day": 55.35000000000003,
+        "mean_latency_ms": 5.0,
+        "mean_sla_risk": 0.009087947564864907
+      },
+      "optimized": {
+        "energy_kwh_day": 41.292753222516325,
+        "co2e_kg_day": 9.293939870308654,
+        "cost_usd_day": 38.20333333333333,
+        "mean_latency_ms": 10.0,
+        "mean_sla_risk": 0.04850461814935301
+      },
+      "delta_pct": {
+        "energy_kwh_day": -18.5,
+        "co2e_kg_day": -47.13,
+        "cost_usd_day": -30.98
+      },
+      "delta_abs": {
+        "mean_latency_ms": 5.0,
+        "mean_sla_risk": 0.0394
+      },
+      "changed_workloads": 10
+    }
+  ],
+  "ci_forecast_backtest": [
+    {
+      "region": "ap-south",
+      "mae_g_per_kwh": 21.36,
+      "naive_last_value_mae": 89.31,
+      "holdout_hours": 24
+    },
+    {
+      "region": "eu-north",
+      "mae_g_per_kwh": 1.11,
+      "naive_last_value_mae": 2.37,
+      "holdout_hours": 24
+    },
+    {
+      "region": "eu-west",
+      "mae_g_per_kwh": 8.64,
+      "naive_last_value_mae": 36.39,
+      "holdout_hours": 24
+    },
+    {
+      "region": "us-east",
+      "mae_g_per_kwh": 9.25,
+      "naive_last_value_mae": 50.36,
+      "holdout_hours": 24
+    },
+    {
+      "region": "us-west",
+      "mae_g_per_kwh": 5.7,
+      "naive_last_value_mae": 50.77,
+      "holdout_hours": 24
+    }
+  ],
+  "anomaly": {
+    "injected_events": 75,
+    "detected": 74,
+    "missed": 1,
+    "false_alarms": 2,
+    "recall": 0.987,
+    "precision": 0.974,
+    "note": "Injected CPU/network spikes in synthetic data; real-world precision/recall will differ."
+  },
+  "runtime_seconds": 58.9
+}

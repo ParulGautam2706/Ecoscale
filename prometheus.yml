@@ -1,0 +1,5 @@
+# Optional: scrape the backend  ->  prometheus --config.file=prometheus.yml
+global: { scrape_interval: 15s }
+scrape_configs:
+  - job_name: greencloud
+    static_configs: [{ targets: ["localhost:8000"] }]
