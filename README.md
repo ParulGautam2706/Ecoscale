@@ -1,82 +1,207 @@
-# GreenCloud AI 2.0
+# GreenCloud AI 2.0 (EcoScale)
 
-Explainable, cost-efficient, **carbon-aware** cloud resource monitoring and optimization platform (FastAPI + React).
-Recommendations are **advisory only**. Every value is labelled `measured`, `estimated`, `simulated` or `predicted`.
+An explainable, carbon-aware decision-support platform for cloud cost and resource optimization.
 
-> Demo data is **simulated** and carbon intensity is **illustrative**. Numbers in the UI are estimates, not measurements.
+GreenCloud AI estimates the energy use and carbon emissions of cloud resources, forecasts utilization with machine learning, and recommends changes that lower **cost** and **carbon** together, without breaking performance limits. Every recommendation can be explained and tested in a what-if simulator first.
 
-## Quick start (Windows PowerShell)
+> **Advisory only.** The platform never changes real cloud infrastructure. Public workload traces contain no measured energy, so energy values are estimates and learned models are proxy estimators.
 
-Prerequisites: Python 3.11, Node.js 20+, Git.
+---
 
-```powershell
-# 1) Backend
+## Features
+
+| Feature | Description |
+|---|---|
+| Energy and carbon engine | Converts CPU, memory, GPU, storage and network utilization into IT power, energy, facility energy (via PUE) and CO2e using regional grid carbon intensity |
+| ML forecasting | Trains and compares several models, then uses the best one for utilization and energy forecasts |
+| Utilization tiering | KMeans groups resources into Idle, Underused, Optimal and Overused tiers |
+| Carbon-aware scheduling | Suggests running flexible workloads at a cleaner time or in a cleaner region, within deadline, capacity and latency limits |
+| Multi-objective optimizer | Weighs carbon, cost, latency and SLA risk and shows the trade-offs |
+| Explainability | SHAP feature importance and a written explanation for each recommendation |
+| What-if simulator | Compares the current setup with alternatives before any change |
+| Anomaly detection | Isolation Forest flags unusual CPU, memory, network or energy behavior |
+| Dashboard and reports | Web dashboard with charts, plus generated reports |
+
+## How it works
+
+```
+Data input -> Energy model -> Carbon engine -> ML forecasting
+                                                     |
+Dashboard + reports <- What-if simulator <- Explainability <- Optimization
+```
+
+1. **Data input:** seed data, simulated or ingested telemetry, or metrics collected from the local machine.
+2. **Energy model:** utilization is converted to power (W) and energy (kWh); PUE is applied once to total IT energy.
+3. **Carbon engine:** energy multiplied by the regional carbon intensity gives CO2e.
+4. **Forecasting:** several models are trained and compared; the best is chosen from measured validation results.
+5. **Optimization:** inefficiencies are found and ranked actions are produced.
+6. **Explainability and simulation:** the user sees why a change is suggested and previews its effect.
+7. **Dashboard and reports:** results, savings and alerts are shown in the web app.
+
+## Tech stack
+
+- **Frontend:** React, Vite, Tailwind CSS (port `5173`)
+- **Backend:** Python 3.11, FastAPI, uvicorn (port `8000`, API under `/api/v1`)
+- **Database:** SQLite with SQLAlchemy; Alembic for migrations
+- **ML:** scikit-learn, with optional XGBoost and LightGBM
+- **Auth:** JWT login and registration
+- **Packaging:** Docker Compose (optional)
+
+## Project structure
+
+```
+greencloud-ai/
+  backend/
+    main.py              FastAPI entry point
+    app/                 routers, services, ML pipeline, database
+    scripts/             train_models.py, run_experiments.py, build_research_doc.py
+    tests/               pytest tests
+    requirements.txt
+  frontend/
+    src/                 React app
+    vite.config.js       dev server and /api proxy
+  .env.example
+  docker-compose.yml
+```
+
+## Requirements
+
+- Python 3.11
+- Node.js 20 or newer
+- Git
+
+## Quick start (Windows)
+
+Use two terminal windows and keep both open.
+
+### 1. Backend
+
+```bat
 cd greencloud-ai\backend
 py -3.11 -m venv .venv
-.\.venv\Scripts\Activate.ps1          # if blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-pip install -r requirements.txt
-copy ..\.env.example .env             # then edit SECRET_KEY to a long random string
-pytest -q                             # 50+ tests, ~1 min
-uvicorn main:app --reload             # API docs: http://127.0.0.1:8000/docs
+.venv\Scripts\activate.bat
+python -m pip install -r requirements.txt
+copy ..\.env.example .env
+```
 
-# 2) Frontend (new terminal)
+Open `.env` and set `SECRET_KEY` to a long random string. You can generate one with:
+
+```bat
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Start the server:
+
+```bat
+python -m uvicorn main:app --port 8000
+```
+
+Check it works by opening `http://127.0.0.1:8000/api/v1/health` and `http://127.0.0.1:8000/docs`.
+The root address `http://127.0.0.1:8000/` shows `{"detail":"Not Found"}`. This is normal, because the API has no page there.
+
+### 2. Frontend
+
+```bat
 cd greencloud-ai\frontend
 npm install
+npm run dev
+```
+
+Open the URL Vite prints (normally `http://localhost:5173`). The dev server forwards `/api` requests to `http://127.0.0.1:8000`, so the backend must be running.
+
+### 3. Load data
+
+Either call **POST `/api/v1/admin/seed`** from `http://127.0.0.1:8000/docs`, or from the backend folder run:
+
+```bat
+python scripts\train_models.py --seed
+```
+
+### Database tables with Alembic (instead of automatic setup)
+
+```bat
+cd greencloud-ai\backend
+alembic upgrade head
+```
+
+## Docker (optional)
+
+```bat
+cd greencloud-ai
+copy .env.example .env
+docker compose up --build
+```
+
+## Tests
+
+```bat
+cd greencloud-ai\backend
+python -m pytest -q
+
+cd ..\frontend
 npm test
-npm run dev                           # http://localhost:5173
 ```
 
-First run: open http://localhost:5173 → **Register** (first account becomes admin) → Dashboard → **Load simulated demo data**
-→ AI Predictions → train models → Resource Optimization → **Run optimization analysis**.
+Running `python -m pytest` instead of `pytest` avoids the "not recognized" error when the virtual environment is not on PATH.
 
-### Database migrations
-```powershell
-cd backend
-alembic upgrade head                  # creates all tables (SQLite by default; PostgreSQL via DATABASE_URL)
-alembic revision --autogenerate -m "describe change"
+## Research experiments
+
+To re-run the experiments and rebuild the research document:
+
+```bat
+cd greencloud-ai\backend
+python scripts\run_experiments.py --interval 600
+python scripts\build_research_doc.py
 ```
 
-### Reproduce the research results
-```powershell
-cd backend
-python scripts\run_experiments.py --interval 600      # ~1 min, writes research\results.json / results.md
-python scripts\build_research_doc.py                  # regenerates the research document from those results
-```
+## API overview
 
-### Docker (PostgreSQL + backend + nginx frontend)
-```powershell
-copy .env.example .env                # set SECRET_KEY and POSTGRES_PASSWORD
-docker compose up --build             # UI http://localhost:8080 , API http://localhost:8000/docs
-```
-*The Docker files were written but not executed in the authoring environment — expect to debug on first run.*
+All endpoints start with `/api/v1`. Full interactive documentation is at `/docs`.
 
-### Optional Prometheus
-`GET /metrics` exposes `gc_*` gauges/counters labelled with `origin`. `prometheus.yml` is a ready scrape config.
-
-## Architecture
-```
-React (Vite, Tailwind, Recharts) --JWT--> FastAPI --> services --> SQLAlchemy (SQLite / PostgreSQL)
-   pages: Dashboard · Monitoring · Carbon · Predictions · Optimization · Cost · Explainable AI · Simulator · Anomalies · Reports · Settings
-backend/app: api/ core/ database/ models/ schemas/ services/ ml/ optimization/ monitoring/ utils/
-```
-Energy pipeline: utilization → component power (W) → IT kWh (W·s/3.6e6) → ×PUE → ×gCO2e/kWh/1000 = kgCO2e.
-
-| Area | Module |
+| Area | Example endpoints |
 |---|---|
-| Energy/carbon engine | `services/energy.py`, `services/carbon.py`, `utils/units.py` |
-| ML (LR, RF, GBR, HistGB, XGBoost, LightGBM) | `ml/features.py`, `ml/train.py`, `ml/pipeline.py`, `ml/explain.py` |
-| Optimization (MILP, scheduler, idle/consolidation) | `optimization/*` |
-| What-if, anomaly, reports | `services/simulation.py`, `anomaly.py`, `reporting.py` |
-| Monitoring | `monitoring/collectors.py`, `monitoring/prometheus.py` |
+| Auth | `/auth/register`, `/auth/login`, `/auth/me` |
+| Reference data | `/resources`, `/regions`, `/instance-types`, `/admin/seed`, `/settings` |
+| Dashboard | `/dashboard/summary` |
+| Carbon | `/carbon/timeseries`, `/carbon/regions`, `/carbon/workloads`, `/carbon/before-after`, `/carbon/intensity`, `/carbon/forecast`, `/carbon/estimate` |
+| Telemetry | `/telemetry`, `/telemetry/ingest`, `/telemetry/simulate`, `/telemetry/collect-local` |
+| ML | `/ml/train`, `/ml/models`, `/ml/comparison/{target}`, `/ml/forecast/{resource_id}`, `/ml/predict-energy`, `/ml/importance/{target}` |
+| Optimization | `/optimization/run`, `/optimization/recommendations`, `/optimization/multiobjective`, `/optimization/tradeoffs`, `/optimization/schedule`, `/optimization/inefficiencies` |
+| Cost | `/cost/summary` |
+| Explain | `/explain/recommendation/{rec_id}`, `/explain/model/{target}` |
+| Simulate | `/simulate`, `/simulate/history` |
+| Anomalies | `/anomalies/detect`, `/anomalies` |
+| Reports | `/reports/generate` |
+| Health | `/health` |
 
-## Honest limitations
-- No metered power → energy/carbon are model estimates; ML energy models are **proxies** of the power model (R² ≈ 1 is expected, not a validation).
-- Carbon-intensity, price, latency and hardware-power tables are **illustrative assumptions**; replace them (Settings, `core/defaults.py`, or a carbon-API adapter).
-- Google Cluster traces are supported via the preprocessing pipeline but are not bundled.
-- Region moves do not check availability, quotas or data residency. SLA risk is a heuristic.
-- LightGBM/XGBoost are used when installable; otherwise they are skipped automatically.
+## Troubleshooting
 
-## Testing
-`pytest` covers unit conversions, energy formulas (hand-calculated cases), leakage-free splits, optimizer constraints/capacity, advisory-only behaviour, simulation trade-offs,
-anomaly detection and the full authenticated API workflow. `npm test` covers frontend helpers; `npm run build` verifies the bundle compiles.
-"# Ecoscale" 
+| Problem | Fix |
+|---|---|
+| `pytest`, `uvicorn` or `python` not found | Activate the virtual environment in that window: `.venv\Scripts\activate.bat` (Command Prompt) or `.\.venv\Scripts\Activate.ps1` (PowerShell) |
+| PowerShell blocks the activate script | Run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`, then activate again |
+| `pip install` fails on xgboost or lightgbm | Delete that line from `requirements.txt` and run the install again |
+| Browser Console shows 404 on `/api/v1/...` | An old backend is holding port 8000. Run `netstat -ano \| findstr :8000`, then `taskkill /F /PID <number>`, and start the backend again from this project folder |
+| Vite starts on 5174 instead of 5173 | An old frontend is still running. Run `taskkill /F /IM node.exe` and start `npm run dev` again |
+| Blank page or login fails | Make sure the backend window is still running, then hard refresh with Ctrl+Shift+R |
+| Empty charts or lists | Seed the data (see "Load data" above) |
+| "no such table" error | Run `alembic upgrade head` in the backend folder |
+
+## Limitations
+
+- Energy values are estimates from a configurable power model, not measurements.
+- Models trained on those estimates describe agreement with the power model, not real consumption.
+- Carbon-intensity data covers a limited period, with a static regional table as fallback.
+- Recommendations are advisory and should be reviewed by a person, especially region migrations.
+
+## Future work
+
+- Live telemetry from cloud-provider monitoring and Kubernetes
+- Calibration against measured power data
+- Live carbon-intensity APIs with intensity forecasting
+- Pareto-front optimization (for example NSGA-II)
+- Opt-in execution of approved recommendations, with rollback
+
+## License and credits
+
+Add your license, authors and supervisor details here.
